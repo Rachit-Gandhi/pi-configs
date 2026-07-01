@@ -1,12 +1,21 @@
-# Never commit auth tokens, sessions, or local caches
+# Never commit auth tokens, sessions, logs, installed package caches, or local state
 auth.json
 agent/auth.json
+trust.json
+agent/trust.json
 sessions/
 agent/sessions/
+npm/
+agent/npm/
+git/
+agent/git/
+pi-debug.log
+agent/pi-debug.log
 *.jsonl
 .DS_Store
 
-# Local/editor artifacts
-node_modules/
+# Secrets / env
 .env
 .env.*
+*.pem
+*.key

@@ -2,24 +2,47 @@
 
 Source-controlled, non-secret pi configuration for this machine.
 
-## Contents
+## Tracked custom pi resources
 
-- `agent/settings.json` - pi agent preferences/model defaults.
-- `agent/extensions/repo-cleanup-agent.ts` - workspace repo cleanup extension.
+This repo is set up to track pi customizations from `~/.pi/agent/`:
 
-## Not committed
+- `agent/settings.json` - pi settings, package refs, default provider/model, etc.
+- `agent/models.json` - custom model/provider definitions, if present.
+- `agent/keybindings.json` - custom TUI keybindings, if present.
+- `agent/AGENTS.md` - global instructions, if present.
+- `agent/SYSTEM.md` / `agent/APPEND_SYSTEM.md` - global system prompt customizations, if present.
+- `agent/extensions/` - global pi extensions.
+- `agent/skills/` - global skills.
+- `agent/prompts/` - global prompt templates.
+- `agent/themes/` - global themes.
 
-The following are intentionally excluded because they contain secrets or noisy local state:
+## Not tracked
+
+These are intentionally excluded because they are secrets, machine state, or generated installs:
 
 - `agent/auth.json`
 - `agent/sessions/`
+- `agent/trust.json`
+- `agent/npm/`
+- `agent/git/`
 - `*.jsonl`
 - `.env*`
 
-## Install / sync to the correct pi locations
+Package references should be tracked through `agent/settings.json`; installed package contents under `agent/npm/` and `agent/git/` are generated/cache state.
+
+## Sync from this machine into git
+
+```bash
+./sync-from-pi.sh
+git add .
+git commit -m "Update pi config"
+git push
+```
+
+## Install / restore into pi's correct global locations
 
 ```bash
 ./install.sh
 ```
 
-This copies files into `~/.pi/agent/`, which is the correct global auto-discovery location for pi agent settings and extensions.
+This copies files into `~/.pi/agent/`, pi's global config and auto-discovery directory.
