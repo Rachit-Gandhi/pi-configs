@@ -1,0 +1,12 @@
+# Never commit auth tokens, sessions, or local caches
+auth.json
+agent/auth.json
+sessions/
+agent/sessions/
+*.jsonl
+.DS_Store
+
+# Local/editor artifacts
+node_modules/
+.env
+.env.*
