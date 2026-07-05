@@ -5,6 +5,8 @@ trust.json
 agent/trust.json
 sessions/
 agent/sessions/
+subagents/
+agent/subagents/
 npm/
 agent/npm/
 git/

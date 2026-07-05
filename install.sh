@@ -18,7 +18,7 @@ for file in \
   fi
 done
 
-for dir in extensions skills prompts themes; do
+for dir in extensions skills agents prompts themes; do
   if [ -d "$ROOT/agent/$dir" ]; then
     mkdir -p "$PI_AGENT_DIR/$dir"
     cp -R "$ROOT/agent/$dir/." "$PI_AGENT_DIR/$dir/"

@@ -21,7 +21,7 @@ for file in \
 done
 
 # User-authored resources. These are pi's global auto-discovery locations.
-for dir in extensions skills prompts themes; do
+for dir in extensions skills agents prompts themes; do
   if [ -d "$PI_AGENT_DIR/$dir" ]; then
     rm -rf "$ROOT/agent/$dir"
     mkdir -p "$ROOT/agent"

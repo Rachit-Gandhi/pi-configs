@@ -13,6 +13,7 @@ This repo is set up to track pi customizations from `~/.pi/agent/`:
 - `agent/SYSTEM.md` / `agent/APPEND_SYSTEM.md` - global system prompt customizations, if present.
 - `agent/extensions/` - global pi extensions.
 - `agent/skills/` - global skills.
+- `agent/agents/` - global subagent definitions.
 - `agent/prompts/` - global prompt templates.
 - `agent/themes/` - global themes.
 
@@ -22,6 +23,7 @@ These are intentionally excluded because they are secrets, machine state, or gen
 
 - `agent/auth.json`
 - `agent/sessions/`
+- `agent/subagents/`
 - `agent/trust.json`
 - `agent/npm/`
 - `agent/git/`
