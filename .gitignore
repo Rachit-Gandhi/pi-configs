@@ -11,6 +11,9 @@ npm/
 agent/npm/
 git/
 agent/git/
+node_modules/
+agent/**/node_modules/
+agent/**/.git/
 pi-debug.log
 agent/pi-debug.log
 *.jsonl
