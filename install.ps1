@@ -12,13 +12,13 @@ $ConfigRepo = if ($env:PI_CONFIG_REPO) {
   Join-Path $HOME "workspace/github.com/Rachit-Gandhi/pi-configs"
 }
 
+$Root = $PSScriptRoot
+
 $PiAgentDir = if ($env:PI_CODING_AGENT_DIR) {
   $env:PI_CODING_AGENT_DIR
 } else {
   Join-Path $HOME ".pi/agent"
 }
-
-$Root = $PSScriptRoot
 
 $TrackedFiles = @(
   "settings.json",
@@ -40,8 +40,8 @@ $TrackedDirs = @(
   "bin"
 )
 
-# When executed via: iwr ... | iex
-# $PSScriptRoot is empty, so clone/pull the repo and use that as root.
+# When run with: iwr ... | iex
+# $PSScriptRoot is empty, so use the cloned repo path instead.
 if (-not $Root -or -not (Test-Path -LiteralPath (Join-Path $Root "agent") -PathType Container)) {
   if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "git is required when running install.ps1 directly from Invoke-WebRequest"
