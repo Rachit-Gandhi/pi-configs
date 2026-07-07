@@ -1,9 +1,24 @@
 $ErrorActionPreference = "Stop"
 
-$RepoUrl = if ($env:PI_CONFIG_REPO_URL) { $env:PI_CONFIG_REPO_URL } else { "https://github.com/Rachit-Gandhi/pi-configs.git" }
-$ConfigRepo = if ($env:PI_CONFIG_REPO) { $env:PI_CONFIG_REPO } else { Join-Path $HOME "workspace/github.com/Rachit-Gandhi/pi-configs" }
+$RepoUrl = if ($env:PI_CONFIG_REPO_URL) {
+  $env:PI_CONFIG_REPO_URL
+} else {
+  "https://github.com/Rachit-Gandhi/pi-configs.git"
+}
+
+$ConfigRepo = if ($env:PI_CONFIG_REPO) {
+  $env:PI_CONFIG_REPO
+} else {
+  Join-Path $HOME "workspace/github.com/Rachit-Gandhi/pi-configs"
+}
+
+$PiAgentDir = if ($env:PI_CODING_AGENT_DIR) {
+  $env:PI_CODING_AGENT_DIR
+} else {
+  Join-Path $HOME ".pi/agent"
+}
+
 $Root = $PSScriptRoot
-$PiAgentDir = if ($env:PI_CODING_AGENT_DIR) { $env:PI_CODING_AGENT_DIR } else { Join-Path $HOME ".pi/agent" }
 
 $TrackedFiles = @(
   "settings.json",
@@ -25,12 +40,14 @@ $TrackedDirs = @(
   "bin"
 )
 
-if (-not (Test-Path (Join-Path $Root "agent") -PathType Container)) {
+# When executed via: iwr ... | iex
+# $PSScriptRoot is empty, so clone/pull the repo and use that as root.
+if (-not $Root -or -not (Test-Path -LiteralPath (Join-Path $Root "agent") -PathType Container)) {
   if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "git is required when running install.ps1 directly from Invoke-WebRequest"
   }
 
-  if (Test-Path (Join-Path $ConfigRepo ".git") -PathType Container) {
+  if (Test-Path -LiteralPath (Join-Path $ConfigRepo ".git") -PathType Container) {
     git -C $ConfigRepo pull --ff-only | Out-Null
   } else {
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $ConfigRepo) | Out-Null
@@ -40,23 +57,51 @@ if (-not (Test-Path (Join-Path $Root "agent") -PathType Container)) {
   $Root = $ConfigRepo
 }
 
-function Remove-IfExists([string]$Path) {
+$AgentRoot = Join-Path $Root "agent"
+
+if (-not (Test-Path -LiteralPath $AgentRoot -PathType Container)) {
+  throw "Agent config folder not found: $AgentRoot"
+}
+
+function Remove-IfExists {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path
+  )
+
   if (Test-Path -LiteralPath $Path) {
     Remove-Item -LiteralPath $Path -Recurse -Force
   }
 }
 
-function Clean-GeneratedState([string]$Path) {
-  if (-not (Test-Path -LiteralPath $Path -PathType Container)) { return }
+function Clean-GeneratedState {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path
+  )
+
+  if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+    return
+  }
+
   Get-ChildItem -LiteralPath $Path -Recurse -Force -Directory |
     Where-Object { $_.Name -in @(".git", "node_modules") } |
     Sort-Object FullName -Descending |
     Remove-Item -Recurse -Force
+
   Get-ChildItem -LiteralPath $Path -Recurse -Force -File -Filter ".DS_Store" |
     Remove-Item -Force
 }
 
-function Copy-Tree([string]$Source, [string]$Target) {
+function Copy-Tree {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Source,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Target
+  )
+
   Remove-IfExists $Target
   New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Target) | Out-Null
   Copy-Item -LiteralPath $Source -Destination $Target -Recurse -Force
@@ -64,11 +109,11 @@ function Copy-Tree([string]$Source, [string]$Target) {
 }
 
 New-Item -ItemType Directory -Force -Path $PiAgentDir | Out-Null
-$AgentRoot = Join-Path $Root "agent"
 
 foreach ($File in $TrackedFiles) {
   $Source = Join-Path $AgentRoot $File
   $Target = Join-Path $PiAgentDir $File
+
   if (Test-Path -LiteralPath $Source -PathType Leaf) {
     Copy-Item -LiteralPath $Source -Destination $Target -Force
   } else {
@@ -79,6 +124,7 @@ foreach ($File in $TrackedFiles) {
 foreach ($Dir in $TrackedDirs) {
   $Source = Join-Path $AgentRoot $Dir
   $Target = Join-Path $PiAgentDir $Dir
+
   if (Test-Path -LiteralPath $Source -PathType Container) {
     Copy-Tree $Source $Target
   } else {
